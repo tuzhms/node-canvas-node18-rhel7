@@ -8,14 +8,14 @@ disttype="$2"
 customtag="$3"
 datestring="$4"
 commit="$5"
-fullversion="$6"
+fullversion="v18.20.5"
 source_url="$7"
 source_urlbase="$8"
 config_flags=""
 
 cd /home/node
 
-tar -xf node.tar.xz
+tar -xzf node.tar.gz
 
 # configuring cares correctly to not use sys/random.h on this target
 cd "node-${fullversion}"/deps/cares
@@ -38,15 +38,25 @@ export MAJOR_VERSION=$(echo ${fullversion} | cut -d . -f 1 | tr --delete v)
 . /opt/rh/devtoolset-12/enable
 . /opt/rh/rh-python38/enable
 
-make -j$(getconf _NPROCESSORS_ONLN) binary V= \
-  DESTCPU="x64" \
-  ARCH="x64" \
-  VARIATION="glibc-217" \
-  DISTTYPE="$disttype" \
-  CUSTOMTAG="$customtag" \
-  DATESTRING="$datestring" \
-  COMMIT="$commit" \
-  RELEASE_URLBASE="$release_urlbase" \
-  CONFIG_FLAGS="$config_flags"
+./configure
+make -j$(getconf _NPROCESSORS_ONLN)
 
-mv node-*.tar.?z /out/
+# mv node-*.tar.?z /out/
+export PATH="$PATH:/home/node/node-v18.20.5/out/Release/"
+
+node --version
+
+curl -qL https://www.npmjs.com/install.sh | sh
+
+node out/bin/npm i -g npm@9.9.4
+
+node out/bin/npm --version
+
+node out/bin/npm install canvas@2.11.2 --build-from-source
+
+cd node_modules/canvas/build/
+
+ldd Release/canvas.node | awk '{print $3}' | grep -E '^/lib64/*' | xargs -I {} cp {} Release/
+
+tar -czf "/home/node/canvas-v2.11.2-node-v108-linux-glibc-x64.tar.gz" -C . Release/
+tar -tvf /home/node/canvas-v2.11.2-node-v108-linux-glibc-x64.tar.gz

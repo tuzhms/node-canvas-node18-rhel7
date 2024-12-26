@@ -31,13 +31,14 @@ RUN ulimit -n 1024 \
          ccache \
          xz-utils \
          devtoolset-12 \
-         glibc-devel
+         glibc-devel \
+         gcc-c++ cairo-devel pango-devel libjpeg-turbo-devel giflib-devel
+
+RUN curl https://nodejs.org/dist/v18.20.5/node-v18.20.5.tar.gz -o /home/node/node.tar.gz
 
 COPY --chown=node:node run.sh /home/node/run.sh
 
-VOLUME /home/node/.ccache
 VOLUME /out
-VOLUME /home/node/node.tar.xz
 
 USER node
 
